@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/legacy/image';
 import { useRouter } from 'next/router';
-import { Modal, Form, Input, Button, DatePicker, message, Select } from 'antd';
+import { Modal, Form, Input, Button, DatePicker, message, Select, Typography } from 'antd';
 import type { FormInstance } from 'antd/es/form';
 import { ethers } from 'ethers';
 import { DEFAULT_ORG, DEFAULT_ORG_OWNER, ORG_MINTER } from '../config/index';
 import mintABI from '../abis/mint.json';
+
+const { Paragraph, Text } = Typography;
 
 import dayjs from 'dayjs';
 type FieldType = {
@@ -49,8 +51,6 @@ const ProfilePage: React.FC = () => {
         desc: item.desc,
       }));
 
-      console.log('formatList', formatList);
-
       setMintList(formatList);
     } catch (error: any) {
       console.error(error);
@@ -93,8 +93,6 @@ const ProfilePage: React.FC = () => {
 
       const timestamp = dayjs(date).unix();
 
-      console.log(formdata);
-
       await mintNFT(to, title, desc, tokenType, timestamp);
 
       await getMintNFTList();
@@ -104,8 +102,9 @@ const ProfilePage: React.FC = () => {
       setisIssueCredentialsDialogShow(false);
     } catch (error: any) {
       console.error(error);
-      setisSubmitting(false);
       message.error('mint failed:', error.toString());
+    } finally {
+      setisSubmitting(false);
     }
   };
 
@@ -166,8 +165,20 @@ const ProfilePage: React.FC = () => {
                   <div
                     className='text-left text-xs w-[400px] bg-slate-700 mr-2 mb-2 p-4 rounded-sm'
                     key={`${item.orgId}_${item.date}_${index}`}>
-                    <div className='mb-1 text-lg'>Title: {item.title}</div>
-                    <div className='mb-1'>Date Completed:{dayjs.unix(item.date).format('YYYY-MM-DD')}</div>
+                    <div className='mb-1'>
+                      <Text className='text-lg text-violet-600' ellipsis>
+                        {item.title}
+                      </Text>
+                    </div>
+                    <div className='mb-1 '>Date Completed: {dayjs.unix(item.date).format('YYYY-MM-DD')}</div>
+                    <div className='mb-1 flex items-baseline'>
+                      <div>Desc: </div>
+                      <Paragraph
+                        className='text-white ml-1 text-[12px] !mb-0'
+                        ellipsis={{ rows: 3, expandable: false }}>
+                        {item.desc}
+                      </Paragraph>
+                    </div>
                     <div className=''>To {item.to}</div>
                   </div>
                 );
@@ -208,7 +219,7 @@ const ProfilePage: React.FC = () => {
           style={{ maxWidth: 600 }}
           ref={formRef}
           initialValues={{
-            tokenType: 1,
+            tokenType: 0,
             title: '',
             to: '',
             date: '',
