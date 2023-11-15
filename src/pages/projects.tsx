@@ -1,6 +1,6 @@
 // projects.tsx
 import React, { useState } from "react";
-import Image from "next/image";
+import Image from "next/legacy/image";
 import Header from "../components/Header";
 import BlackBox from "../components/BlackBox";
 import PurpleButton from "../components/PurpleButton";

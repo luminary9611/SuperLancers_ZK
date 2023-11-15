@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState } from "react";
-import Image from "next/image";
+import Image from "next/legacy/image";
 import Header from "../components/Header";
 import Button from "../components/Button"; // Assuming Button is styled as per your design
 import SubmitModal from "./submit"; // Modal component for submitting work

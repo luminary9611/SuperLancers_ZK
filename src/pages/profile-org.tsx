@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "next/legacy/image";
 import Header from "../components/Header";
 import Layout from "../components/Layout";
 import Button from "../components/Button";
