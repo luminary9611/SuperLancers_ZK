@@ -6,14 +6,15 @@ import Box from "../components/Box";
 import { useRouter } from "next/router";
 import { ethers } from "ethers";
 import mintABI from '../abis/mint.json';
+import { DEFAULT_ORG, DEFAULT_ORG_OWNER, ORG_MINTER } from '../config/index';
 
 const ProfilePage: React.FC = () => {
   const [isShowAvailablity, setIsShowAvailablity] = useState<boolean>(false);
   const router = useRouter(); // Initialize the router
-  const defaultAddress = '0x7A280703AA3044E6c3A6b4AF3ce397D9f11C3F99';
+  const defaultAddress = DEFAULT_ORG_OWNER;
 
   const [mintList, setMintList] = useState<any>([]);
-  const mintAddress = '0x28CA98427de1F79D8e22f85Df053F6Ab4FC2c93e';
+  const mintAddress = ORG_MINTER;
   
 
   const mintNFT = async (to: string, title: string, desc: string, timestamp: number ) => {
@@ -23,7 +24,7 @@ const ProfilePage: React.FC = () => {
 
     try {
       const tx = await contract.mint({
-        orgId: 1,
+        orgId: DEFAULT_ORG,
         to,
         tokenType: 0, // 0，1，2
         date: timestamp,
@@ -49,14 +50,14 @@ const ProfilePage: React.FC = () => {
     const contract = new ethers.Contract(mintAddress, mintABI, provider);
 
     try {
-      const orgTokenHolders = await contract.getOrgTokenHolders(1);
+      const orgTokenHolders = await contract.getOrgTokenHolders(DEFAULT_ORG);
       
       if(!orgTokenHolders.length) {
         setMintList([]);
         return;
       }
 
-      const tasks = orgTokenHolders.map((address: string) => contract.getTokenInfo(1, address));
+      const tasks = orgTokenHolders.map((address: string) => contract.getTokenInfo(DEFAULT_ORG, address));
       const list = await Promise.all(tasks);
 
       setMintList(list.map(item => ({
@@ -121,7 +122,7 @@ const ProfilePage: React.FC = () => {
             {!isShowAvailablity ? <></> : (
               <Button onClick={() => handleViewAvailablity()}>VIEW AVAILABILITY</Button>
             )}
-            <Button onClick={() => mintNFT('0x72e156E41D0Dd39C74ACc0f2BDeE240e08D068EB', 'Noven1', 'Noven1', ~~(Date.now()/1000) + 24 * 3600)}>EDIT PROFILE</Button>
+            <Button onClick={() => {}}>EDIT PROFILE</Button>
             <Button onClick={handleViewOrganisation}>VIEW ORGANISATION</Button>
           </div>
         </section>
