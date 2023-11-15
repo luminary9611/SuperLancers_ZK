@@ -1,6 +1,7 @@
 
 
 // Prod
+// export const CHAIN_ID = '280';
 // export const DEFAULT_ORG = 2;
 // export const DEFAULT_ORG_OWNER = '0x12340ffd2aca0d6c1d5336e1e5fdf53c3169dfc9';
 // export const ORG_MINTER = '0x28CA98427de1F79D8e22f85Df053F6Ab4FC2c93e';
@@ -9,6 +10,7 @@
 // Dev
 export const CHAIN_ID = '280';
 export const DEFAULT_ORG = 1;
-export const DEFAULT_ORG_OWNER = '0x7A280703AA3044E6c3A6b4AF3ce397D9f11C3F99';
+export const DEFAULT_ORG_OWNER = '0x12340ffd2aca0d6c1d5336e1e5fdf53c3169dfc9';
+
 export const ORG_MINTER = '0x662Bcb0aD552aA735BD027709e8B9Fa3a35Ce500';
 export const CREDENTIAL = '0x078a1A521a8b2867f75DC4dD5EE26F3a41DB5fcf';
