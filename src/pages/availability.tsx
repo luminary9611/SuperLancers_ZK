@@ -65,6 +65,13 @@ const ProfilePage: React.FC = () => {
     setisIssueCredentialsDialogShow(true);
   };
 
+  const closeIssueCredentials = () => {
+    setisIssueCredentialsDialogShow(true);
+    formRef?.current?.resetFields();
+
+    setisIssueCredentialsDialogShow(false);
+  };
+
   const submitCredentials = async () => {
     let flag = true;
 
@@ -78,9 +85,8 @@ const ProfilePage: React.FC = () => {
 
     if (isSubmitting) return;
 
-    setisSubmitting(true);
-
     try {
+      setisSubmitting(true);
       const formdata = formRef?.current?.getFieldsValue(true) || {};
 
       const { title, to, date, desc, tokenType } = formdata;
@@ -99,7 +105,7 @@ const ProfilePage: React.FC = () => {
     } catch (error: any) {
       console.error(error);
       setisSubmitting(false);
-      message.success('mint success:', error.toString());
+      message.error('mint failed:', error.toString());
     }
   };
 
@@ -154,13 +160,13 @@ const ProfilePage: React.FC = () => {
 
         <section className='text-center mb-10'>
           {mintList && mintList.length ? (
-            <div className='flex '>
+            <div className='flex flex-wrap '>
               {mintList.map((item: any, index: number) => {
                 return (
                   <div
-                    className='text-left text-xs w-[400px] bg-slate-700 mr-2 mb-1 p-4 rounded-sm'
+                    className='text-left text-xs w-[400px] bg-slate-700 mr-2 mb-2 p-4 rounded-sm'
                     key={`${item.orgId}_${item.date}_${index}`}>
-                    <div className='mb-1'>Title: {item.title}</div>
+                    <div className='mb-1 text-lg'>Title: {item.title}</div>
                     <div className='mb-1'>Date Completed:{dayjs.unix(item.date).format('YYYY-MM-DD')}</div>
                     <div className=''>To {item.to}</div>
                   </div>
@@ -196,6 +202,7 @@ const ProfilePage: React.FC = () => {
 
       <Modal title='Issue Credentials' width={800} open={isIssueCredentialsDialogShow} closeIcon={null} footer={null}>
         <Form
+          disabled={isSubmitting}
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 600 }}
@@ -244,7 +251,7 @@ const ProfilePage: React.FC = () => {
             <Button loading={isSubmitting} onClick={submitCredentials}>
               Submit
             </Button>
-            <Button disabled={isSubmitting} className='ml-2' onClick={submitCredentials}>
+            <Button disabled={isSubmitting} className='ml-2' onClick={closeIssueCredentials}>
               Cancel
             </Button>
           </Form.Item>
