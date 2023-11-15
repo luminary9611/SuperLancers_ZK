@@ -1,4 +1,10 @@
-export const DEFAULT_ORG = 2;
-export const DEFAULT_ORG_OWNER = '0x12340ffd2aca0d6c1d5336e1e5fdf53c3169dfc9';
 export const ORG_MINTER = '0x28CA98427de1F79D8e22f85Df053F6Ab4FC2c93e';
 export const CREDEnTIAL = '0x0a482d6e24ff7E448976b72143A004991B676d13';
+
+// Prod
+// export const DEFAULT_ORG = 2;
+// export const DEFAULT_ORG_OWNER = '0x12340ffd2aca0d6c1d5336e1e5fdf53c3169dfc9';
+
+// Dev
+export const DEFAULT_ORG = 1;
+export const DEFAULT_ORG_OWNER = '0x179125b06A84979c7457D0f7b59702D2271Ce5e6';

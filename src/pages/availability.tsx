@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/legacy/image';
-import Header from '../components/Header';
 import { useRouter } from 'next/router';
 import { Modal, Form, Input, Button, DatePicker, message, Select } from 'antd';
 import type { FormInstance } from 'antd/es/form';
+import { ethers } from 'ethers';
+import { DEFAULT_ORG, DEFAULT_ORG_OWNER, ORG_MINTER } from '../config/index';
+import mintABI from '../abis/mint.json';
+
 import dayjs from 'dayjs';
 type FieldType = {
   title?: string;
@@ -15,26 +18,45 @@ type FieldType = {
 const { TextArea } = Input;
 const ProfilePage: React.FC = () => {
   const router = useRouter(); // Initialize the router
+  const [mintList, setMintList] = useState<any>([]);
 
-  const [mintList, setMintList] = useState<any>([
-    {
-      orgId: 1,
-      tokenType: 1,
-      to: '0x814E8B823E96604f99892B98C45317495B698F12',
-      date: 1698682408,
-      title: 'asdasdasd',
-      desc: '',
-    },
-    {
-      orgId: 2,
-      tokenType: 1,
-      to: '0x814E8B823E96604f99892B98C45317495B698F12',
-      date: 1698682408,
-      title: 'asdasdasd',
-      desc: '',
-    },
-  ]);
+  const mintAddress = ORG_MINTER;
+  const defaultAddress = DEFAULT_ORG_OWNER;
 
+  const [isSubmitting, setisSubmitting] = useState<boolean>(false);
+
+  const getMintNFTList = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const contract = new ethers.Contract(mintAddress, mintABI, provider);
+
+    try {
+      const orgTokenHolders = await contract.getOrgTokenHolders(DEFAULT_ORG);
+
+      if (!orgTokenHolders.length) {
+        setMintList([]);
+        return;
+      }
+
+      const tasks = orgTokenHolders.map((address: string) => contract.getTokenInfo(DEFAULT_ORG, address));
+      const list = await Promise.all(tasks);
+
+      const formatList = list.map((item) => ({
+        orgId: item.orgId.toNumber(),
+        to: item.to,
+        tokenType: item.tokenType, // 0，1，2
+        date: item.date.toNumber(),
+        title: item.title,
+        desc: item.desc,
+      }));
+
+      console.log('formatList', formatList);
+
+      setMintList(formatList);
+    } catch (error: any) {
+      console.error(error);
+      alert('get mint list failed, ' + error.toString());
+    }
+  };
   const formRef = useRef<FormInstance>(null);
 
   const [isIssueCredentialsDialogShow, setisIssueCredentialsDialogShow] = useState<boolean>(false);
@@ -43,12 +65,22 @@ const ProfilePage: React.FC = () => {
     setisIssueCredentialsDialogShow(true);
   };
 
-  const getCredentials = () => {};
-
   const submitCredentials = async () => {
+    let flag = true;
+
     try {
       await formRef?.current?.validateFields();
+    } catch (error) {
+      flag = false;
+    }
 
+    if (!flag) return;
+
+    if (isSubmitting) return;
+
+    setisSubmitting(true);
+
+    try {
       const formdata = formRef?.current?.getFieldsValue(true) || {};
 
       const { title, to, date, desc, tokenType } = formdata;
@@ -57,26 +89,62 @@ const ProfilePage: React.FC = () => {
 
       console.log(formdata);
 
-      //   TODO:提交
+      await mintNFT(to, title, desc, tokenType, timestamp);
+
+      await getMintNFTList();
 
       formRef?.current?.resetFields();
 
       setisIssueCredentialsDialogShow(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      setisSubmitting(false);
+      message.success('mint success:', error.toString());
     }
   };
 
-  useEffect(() => {
-    if (false) {
-      router.replace('/');
+  const mintNFT = async (to: string, title: string, desc: string, tokenType: number, timestamp: number) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(mintAddress, mintABI, signer);
+
+    const tx = await contract.mint({
+      orgId: DEFAULT_ORG,
+      to,
+      tokenType, // 0，1，2
+      date: timestamp,
+      title,
+      desc,
+    });
+
+    console.log(tx.hash);
+
+    await tx.wait();
+
+    message.success('mint success, tx hash ' + tx.hash);
+  };
+
+  const init = () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    if (provider.provider?.selectedAddress.toLowerCase() !== defaultAddress.toLowerCase()) {
+      return router.replace('/');
     }
+
+    window.ethereum.on('accountsChanged', function () {
+      if (provider.provider?.selectedAddress.toLowerCase() !== defaultAddress.toLowerCase()) {
+        router.replace('/');
+      }
+    });
+
+    getMintNFTList();
+  };
+
+  useEffect(() => {
+    init();
   }, []);
 
   return (
     <div className='bg-black text-white min-h-screen '>
-      <Header />
-
       <main className='container mx-auto p-4'>
         <section className='text-center mb-10'>
           <div className='inline-block relative'>
@@ -89,7 +157,9 @@ const ProfilePage: React.FC = () => {
             <div className='flex '>
               {mintList.map((item: any, index: number) => {
                 return (
-                  <div className='text-left text-xs w-[400px] bg-slate-700 mr-2 mb-1 p-4 rounded-sm' key={item.orgId}>
+                  <div
+                    className='text-left text-xs w-[400px] bg-slate-700 mr-2 mb-1 p-4 rounded-sm'
+                    key={`${item.orgId}_${item.date}_${index}`}>
                     <div className='mb-1'>Title: {item.title}</div>
                     <div className='mb-1'>Date Completed:{dayjs.unix(item.date).format('YYYY-MM-DD')}</div>
                     <div className=''>To {item.to}</div>
@@ -171,8 +241,10 @@ const ProfilePage: React.FC = () => {
           </Form.Item>
 
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button onClick={submitCredentials}>Submit</Button>
-            <Button className='ml-2' onClick={submitCredentials}>
+            <Button loading={isSubmitting} onClick={submitCredentials}>
+              Submit
+            </Button>
+            <Button disabled={isSubmitting} className='ml-2' onClick={submitCredentials}>
               Cancel
             </Button>
           </Form.Item>
