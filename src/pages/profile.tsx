@@ -13,14 +13,23 @@ const ProfilePage: React.FC = () => {
   const defaultAddress = '0x7A280703AA3044E6c3A6b4AF3ce397D9f11C3F99';
 
   const [mintList, setMintList] = useState<any>([]);
-  const mintAddress = '';
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const signer = provider.getSigner();
-  const contract = new ethers.Contract(mintAddress, mintABI, signer);
+  const mintAddress = '0x28CA98427de1F79D8e22f85Df053F6Ab4FC2c93e';
+  
 
   const mintNFT = async (to: string, title: string, desc: string, timestamp: number ) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(mintAddress, mintABI, signer);
+
     try {
-      const tx = await contract.mint(to, title, desc, timestamp );
+      const tx = await contract.mint({
+        orgId: 1,
+        to,
+        tokenType: 0, // 0，1，2
+        date: timestamp,
+        title,
+        desc,
+    });
 
       console.log(tx.hash);
 
@@ -36,12 +45,28 @@ const ProfilePage: React.FC = () => {
   }
 
   const getMintNFTList = async () => {
-    const tasks = new Array(10).fill(1).map((item, index) => contract.getMintNFT(index));
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const contract = new ethers.Contract(mintAddress, mintABI, provider);
 
     try {
+      const orgTokenHolders = await contract.getOrgTokenHolders(1);
+      
+      if(!orgTokenHolders.length) {
+        setMintList([]);
+        return;
+      }
+
+      const tasks = orgTokenHolders.map((address: string) => contract.getTokenInfo(1, address));
       const list = await Promise.all(tasks);
 
-      setMintList(list);
+      setMintList(list.map(item => ({
+        orgId: item.orgId.toNumber(),
+        to: item.to,
+        tokenType: item.tokenType, // 0，1，2
+        date: item.date.toNumber(),
+        title: item.title,
+        desc: item.desc,
+      })));
     } catch (error: any) {
       console.error(error);
       alert('get mint list failed, ' + error.toString());
@@ -63,6 +88,8 @@ const ProfilePage: React.FC = () => {
     
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     setIsShowAvailablity(provider.provider?.selectedAddress.toLowerCase() === defaultAddress.toLowerCase());
+
+    getMintNFTList();
   }, [])
 
   return (
@@ -94,7 +121,7 @@ const ProfilePage: React.FC = () => {
             {!isShowAvailablity ? <></> : (
               <Button onClick={() => handleViewAvailablity()}>VIEW AVAILABILITY</Button>
             )}
-            <Button onClick={() => mintNFT()}>EDIT PROFILE</Button>
+            <Button onClick={() => mintNFT('0x72e156E41D0Dd39C74ACc0f2BDeE240e08D068EB', 'Noven1', 'Noven1', ~~(Date.now()/1000) + 24 * 3600)}>EDIT PROFILE</Button>
             <Button onClick={handleViewOrganisation}>VIEW ORGANISATION</Button>
           </div>
         </section>

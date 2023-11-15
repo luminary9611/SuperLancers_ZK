@@ -14,6 +14,7 @@ const Header = () => {
   const [chainId, setChainId] = useState(defaultChainId);
 
   const connectWallet = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
     const accounts = await provider.send("eth_requestAccounts", []);
 
     setAddress(accounts[0]);
