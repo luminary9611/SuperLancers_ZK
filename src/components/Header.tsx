@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import Button from './Button';
 import { truncateStr } from './../utils.js';
 import { ethers } from 'ethers';
-import { CHAIN_ID } from '../config/index';
+import { CHAIN_ID, CHAIN_INFO } from '../config/index';
 
 const Header = () => {
   const [address, setAddress] = useState(undefined);
@@ -27,12 +27,24 @@ const Header = () => {
     const chainId = ethereum.networkVersion;
 
     if (chainId !== CHAIN_ID) {
+      setChainId('');
+      
+      const hexChainId = '0x' + Number(CHAIN_ID).toString(16);
+
+      await window.ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [{
+          chainId: hexChainId,
+          ...CHAIN_INFO
+        }]
+      });
+
       await window.ethereum
         .request({
           method: 'wallet_switchEthereumChain',
           params: [
             {
-              chainId: '0x' + Number(CHAIN_ID).toString(16),
+              chainId: hexChainId,
             },
           ],
         })
