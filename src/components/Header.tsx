@@ -6,12 +6,11 @@ import dynamic from 'next/dynamic';
 import Button from './Button';
 import { truncateStr } from './../utils.js';
 import { ethers } from 'ethers';
-
-const defaultChainId = '5';
+import { CHAIN_ID } from '../config/index';
 
 const Header = () => {
   const [address, setAddress] = useState(undefined);
-  const [chainId, setChainId] = useState(defaultChainId);
+  const [chainId, setChainId] = useState(CHAIN_ID);
 
   const connectWallet = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -27,18 +26,18 @@ const Header = () => {
   const getChainId = async () => {
     const chainId = ethereum.networkVersion;
 
-    if (chainId !== defaultChainId) {
+    if (chainId !== CHAIN_ID) {
       await window.ethereum
         .request({
           method: 'wallet_switchEthereumChain',
           params: [
             {
-              chainId: '0x' + defaultChainId,
+              chainId: '0x' + Number(CHAIN_ID).toString(16),
             },
           ],
         })
         .then(() => {
-          setChainId(defaultChainId);
+          setChainId(CHAIN_ID);
           return;
         })
         .catch((e) => {
@@ -102,7 +101,7 @@ const Header = () => {
               </div>
             </Link>
           )}
-          {chainId === defaultChainId ? (
+          {chainId === CHAIN_ID ? (
             <></>
           ) : (
             <div className='items-center' style={{ marginRight: '10px' }}>
