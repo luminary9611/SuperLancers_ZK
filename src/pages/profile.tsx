@@ -1,21 +1,72 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/legacy/image";
 import Button from "../components/Button";
-import Header from "../components/Header";
 import Box from "../components/Box";
 import { useRouter } from "next/router";
+import { ethers } from "ethers";
+import mintABI from '../abis/mint.json';
 
 const ProfilePage: React.FC = () => {
+  const [isShowAvailablity, setIsShowAvailablity] = useState<boolean>(false);
   const router = useRouter(); // Initialize the router
+  const defaultAddress = '0x7A280703AA3044E6c3A6b4AF3ce397D9f11C3F99';
+
+  const [mintList, setMintList] = useState<any>([]);
+  const mintAddress = '';
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(mintAddress, mintABI, signer);
+
+  const mintNFT = async (to: string, title: string, desc: string, timestamp: number ) => {
+    try {
+      const tx = await contract.mint(to, title, desc, timestamp );
+
+      console.log(tx.hash);
+
+      await tx.wait();
+
+      alert('mint success, tx hash ' + tx.hash);
+
+      getMintNFTList();
+    } catch (error: any) {
+      console.error(error);
+      alert('mint failed, ' + error.toString());
+    }
+  }
+
+  const getMintNFTList = async () => {
+    const tasks = new Array(10).fill(1).map((item, index) => contract.getMintNFT(index));
+
+    try {
+      const list = await Promise.all(tasks);
+
+      setMintList(list);
+    } catch (error: any) {
+      console.error(error);
+      alert('get mint list failed, ' + error.toString());
+    }
+  }
 
   const handleViewOrganisation = () => {
     router.push("/profile-org"); // Redirect to '/profile-org'
   };
+
+  const handleViewAvailablity = () => {
+    router.push("/availability"); // Redirect to '/profile-org'
+  };
+
+  useEffect(() => {
+    window.ethereum.on('accountsChanged', function () {
+      setIsShowAvailablity(provider.provider?.selectedAddress.toLowerCase() === defaultAddress.toLowerCase());
+    })
+    
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    setIsShowAvailablity(provider.provider?.selectedAddress.toLowerCase() === defaultAddress.toLowerCase());
+  }, [])
+
   return (
     <div className="bg-black text-white min-h-screen">
-      <Header />
-
       <main className="container mx-auto p-4">
         <section className="text-center my-10">
           <div className="inline-block relative p-4 rounded-full mb-4">
@@ -40,8 +91,10 @@ const ProfilePage: React.FC = () => {
             armies across the web and world.
           </p>
           <div className="flex justify-center gap-4 mt-4">
-            <Button onClick={() => {}}>VIEW AVAILABILITY</Button>
-            <Button onClick={() => {}}>EDIT PROFILE</Button>
+            {!isShowAvailablity ? <></> : (
+              <Button onClick={() => handleViewAvailablity()}>VIEW AVAILABILITY</Button>
+            )}
+            <Button onClick={() => mintNFT()}>EDIT PROFILE</Button>
             <Button onClick={handleViewOrganisation}>VIEW ORGANISATION</Button>
           </div>
         </section>

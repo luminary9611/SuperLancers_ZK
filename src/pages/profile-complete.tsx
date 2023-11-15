@@ -14,8 +14,6 @@ const ProfilePage: React.FC = () => {
   };
   return (
     <div className="bg-black text-white min-h-screen">
-      <Header />
-
       <main className="container mx-auto p-4">
         <section className="text-center my-10">
           <div className="inline-block relative p-4 rounded-full mb-4">

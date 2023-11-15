@@ -2,13 +2,12 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/legacy/image";
 import Button from "../components/Button";
-import Header from "../components/Header";
+
 import BlackBox from "../components/BlackBox";
 
 const Home: React.FC = () => {
   return (
     <div className="bg-black text-white min-h-screen">
-      <Header />
 
       <main className="container mx-auto px-4">
         <section className="flex items-center py-12">

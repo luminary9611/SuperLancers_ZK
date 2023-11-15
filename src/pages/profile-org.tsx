@@ -18,7 +18,6 @@ const OrgProfilePage: React.FC = () => {
 
   return (
     <Layout>
-      <Header />
       <main className="bg-black text-white min-h-screen">
         {/* Org Description and View Projects Button */}
         <section className="text-center pt-10">

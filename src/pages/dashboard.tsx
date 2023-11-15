@@ -73,7 +73,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="bg-black text-white min-h-screen">
-      <Header />
       <main className="container mx-auto p-4">
         {/* Tasks section */}
         <section className="my-10">

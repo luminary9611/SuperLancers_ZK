@@ -75,7 +75,6 @@ const ProjectBoard: React.FC = () => {
 
   return (
     <div className="bg-black text-white min-h-screen">
-      <Header />
       <div className="container mx-auto p-4">
         <header className="text-center my-10">
           <h1 className="text-5xl font-bold mb-6">The Project Board</h1>

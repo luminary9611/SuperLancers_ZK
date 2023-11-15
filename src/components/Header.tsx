@@ -4,76 +4,68 @@ import Image from "next/legacy/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Button from "./Button";
-import { connect, disconnect } from 'starknetkit'
 import { truncateStr } from './../utils.js'
+import { ethers } from "ethers";
+
+const defaultChainId = '5';
 
 const Header = () => {
+  const [address, setAddress] = useState(undefined);
+  const [chainId, setChainId] = useState(defaultChainId);
 
-  const [connection, setConnection] = useState('');
+  const connectWallet = async () => {
+    const accounts = await provider.send("eth_requestAccounts", []);
 
-const [account, setAccount] = useState('');
+    setAddress(accounts[0]);
+  }
 
-const [address, setAddress] = useState('');
+  const disconnectWallet = async () => {
+    setAddress('');
+  }
 
-const [provider, setProvider] = useState('');
 
-  const connectWallet = async() => {
+  const getChainId = async () => {
+    const chainId = ethereum.networkVersion;
 
-    console.log("test")
-
-    // const connection = await connect({ 
-    
-    //     modalMode: "neverAsk", webWalletUrl: "https://web.argent.xyz" 
-    
-    // });
-
-    const connection = await connect();
-    
-     if(connection && connection.isConnected){
-    
-         setConnection(connection);
-    
-         setProvider(connection.account);
-    
-         setAddress(connection.selectedAddress);
-    
-     }
-    
+    if (chainId !== defaultChainId) {
+      await window.ethereum
+        .request({
+          method: "wallet_switchEthereumChain",
+          params: [
+            {
+              chainId: "0x" + defaultChainId,
+            },
+          ],
+        })
+        .then(() => {
+          setChainId(defaultChainId)
+          return;
+        })
+        .catch((e) => {
+          console.log("wallet_switchEthereumChain error: ", e);
+          setChainId('');
+          return;
+        })
+        .finally(() => { });
     }
-
-    const disconnectWallet = async() => {
-
-      await disconnect();
-   
-      setConnection(undefined);
-   
-      setProvider(undefined);
-   
-      setAddress('');
-   }
+  };
 
   useEffect(() => {
     (async () => {
-      const connection = await connect({ 
+      await getChainId();
+      connectWallet();
 
-        modalMode: "neverAsk", webWalletUrl: "https://web.argent.xyz" 
-  
-    }); 
- 
-    if(connection && connection.isConnected){
- 
-      setConnection(connection);
- 
-      setProvider(connection.account);
- 
-      setAddress(connection.selectedAddress);
- 
-    }
-    })();
+
+      ethereum.on('networkChanged', getChainId)
+    
+      ethereum.on('accountsChanged', function (accounts) {
+        setAddress(accounts[0]);
+      })
+    })()
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 scrolled-header py-2">
+    <header className="sticky top-0 z-40 scrolled-header py-2 text-white bg-black">
       <div className="py-4 flex items-center justify-between mx-12">
         <Link href="/">
           <div className="flex items-center">
@@ -114,19 +106,32 @@ const [provider, setProvider] = useState('');
               </p>
             </div>
           </Link>
-          <Link href="/profile">
-            <div className="items-center" style={{ height: "40px" }}>
-              <p className="text-xl font-bold ml-2 nav-text pr-2 z-10">
-                Profile
-              </p>
-            </div>
-          </Link>
+          {
+            !address ? <></> : (
+              <Link href="/profile">
+                <div className="items-center" style={{ height: "40px" }}>
+                  <p className="text-xl font-bold ml-2 nav-text pr-2 z-10">
+                    Profile
+                  </p>
+                </div>
+              </Link>
+            )
+          }
+          {
+            chainId === defaultChainId ? <></> : (
+              <div className="items-center" style={{ marginRight: '10px' }}>
+                <Button onClick={getChainId}>
+                  Error Network
+                </Button>
+              </div>
+            )
+          }
           <div className="items-center">
-              {address ? (<Button onClick={disconnectWallet}>
-                {truncateStr(address)}
-              </Button>) : (<Button onClick={connectWallet}>
-                Connect Wallet
-              </Button>)}
+            {address ? (<Button onClick={disconnectWallet}>
+              {truncateStr(address)}
+            </Button>) : (<Button onClick={connectWallet}>
+              Connect Wallet
+            </Button>)}
           </div>
         </div>
       </div>
