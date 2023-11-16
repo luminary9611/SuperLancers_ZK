@@ -154,7 +154,7 @@ const ProfilePage: React.FC = () => {
       <main className='container mx-auto p-4'>
         <section className='text-center mb-10'>
           <div className='inline-block relative'>
-            <img src='/availability.jpg' alt='' className='' />
+            <img src='/availability1.jpg' alt='' className='' />
           </div>
         </section>
 
