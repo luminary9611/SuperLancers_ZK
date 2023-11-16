@@ -1,5 +1,5 @@
 //@ts-nocheck
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/legacy/image';
 import Button from '../components/Button';
@@ -14,6 +14,8 @@ const ProfilePage: React.FC = () => {
   const router = useRouter(); // Initialize the router
   const defaultAddress = DEFAULT_ORG_OWNER;
 
+  const provider = useRef(null);
+
   const handleViewOrganisation = () => {
     router.push('/profile-org'); // Redirect to '/profile-org'
   };
@@ -22,14 +24,21 @@ const ProfilePage: React.FC = () => {
     router.push('/availability'); // Redirect to '/profile-org'
   };
 
-  useEffect(() => {
-    window.ethereum.on('accountsChanged', function () {
-      setIsShowAvailablity(provider?.provider?.selectedAddress?.toLowerCase() === defaultAddress.toLowerCase());
-    });
+  const compaireAddress = () => {
+    setIsShowAvailablity(provider?.current?.provider?.selectedAddress?.toLowerCase() === defaultAddress.toLowerCase());
+  };
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    setIsShowAvailablity(provider?.provider?.selectedAddress?.toLowerCase() === defaultAddress.toLowerCase());
-  }, []);
+  useEffect(() => {
+    provider.current = new ethers.providers.Web3Provider(window.ethereum);
+
+    window.ethereum.on('accountsChanged', compaireAddress);
+
+    compaireAddress();
+
+    return () => {
+      window.ethereum.removeListener('accountsChanged', compaireAddress);
+    };
+  }, [router]);
 
   return (
     <div className='bg-black text-white min-h-screen'>

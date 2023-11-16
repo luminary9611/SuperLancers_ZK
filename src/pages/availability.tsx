@@ -25,6 +25,7 @@ const ProfilePage: React.FC = () => {
 
   const mintAddress = ORG_MINTER;
   const defaultAddress = DEFAULT_ORG_OWNER;
+  const provider = useRef(null);
 
   const [isSubmitting, setisSubmitting] = useState<boolean>(false);
 
@@ -131,7 +132,6 @@ const ProfilePage: React.FC = () => {
   };
 
   const init = () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
     if (provider?.provider?.selectedAddress?.toLowerCase() !== defaultAddress?.toLowerCase()) {
       return router.replace('/');
     }
@@ -145,9 +145,25 @@ const ProfilePage: React.FC = () => {
     getMintNFTList();
   };
 
+  const compaireAddress = () => {
+    if (provider?.current?.provider?.selectedAddress?.toLowerCase() !== defaultAddress?.toLowerCase()) {
+      router.replace('/');
+    }
+  };
+
   useEffect(() => {
-    init();
-  }, []);
+    provider.current = new ethers.providers.Web3Provider(window.ethereum);
+
+    window.ethereum.on('accountsChanged', compaireAddress);
+
+    compaireAddress();
+
+    getMintNFTList();
+
+    return () => {
+      window.ethereum.removeListener('accountsChanged', compaireAddress);
+    };
+  }, [router]);
 
   return (
     <div className='bg-black text-white min-h-screen '>
