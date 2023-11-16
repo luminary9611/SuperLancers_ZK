@@ -1,5 +1,5 @@
 //@ts-nocheck
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/legacy/image';
 import Button from '../components/Button';
@@ -14,8 +14,6 @@ const ProfilePage: React.FC = () => {
   const router = useRouter(); // Initialize the router
   const defaultAddress = DEFAULT_ORG_OWNER;
 
-  const provider = useRef(null);
-
   const handleViewOrganisation = () => {
     router.push('/profile-org'); // Redirect to '/profile-org'
   };
@@ -24,21 +22,18 @@ const ProfilePage: React.FC = () => {
     router.push('/availability'); // Redirect to '/profile-org'
   };
 
-  const compaireAddress = () => {
-    setIsShowAvailablity(provider?.current?.provider?.selectedAddress?.toLowerCase() === defaultAddress.toLowerCase());
-  };
-
   useEffect(() => {
-    provider.current = new ethers.providers.Web3Provider(window.ethereum);
+    setTimeout(() => {
+      let provider = new ethers.providers.Web3Provider(window.ethereum);
+      setIsShowAvailablity(provider?.provider?.selectedAddress?.toLowerCase() === defaultAddress.toLowerCase());
 
-    window.ethereum.on('accountsChanged', compaireAddress);
+      window.ethereum.on('accountsChanged', function () {
+        setIsShowAvailablity(provider?.provider?.selectedAddress?.toLowerCase() === defaultAddress.toLowerCase());
+      });
 
-    compaireAddress();
-
-    return () => {
-      window.ethereum.removeListener('accountsChanged', compaireAddress);
-    };
-  }, [router]);
+      setIsShowAvailablity(provider?.provider?.selectedAddress?.toLowerCase() === defaultAddress.toLowerCase());
+    }, 500);
+  }, []);
 
   return (
     <div className='bg-black text-white min-h-screen'>
@@ -59,7 +54,7 @@ const ProfilePage: React.FC = () => {
             strategies and building armies across the web and world.
           </p>
           <div className='flex justify-center gap-4 mt-4'>
-            {!isShowAvailablity ? <></> : <Button onClick={() => handleViewAvailablity()}>VIEW AVAILABILITY</Button>}
+            {!isShowAvailablity ? <></> : <Button onClick={() => handleViewAvailablity()}>ISSUE CREDENTIALS</Button>}
             <Button onClick={() => {}}>EDIT PROFILE</Button>
             <Button onClick={handleViewOrganisation}>VIEW ORGANISATION</Button>
           </div>

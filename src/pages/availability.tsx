@@ -25,7 +25,6 @@ const ProfilePage: React.FC = () => {
 
   const mintAddress = ORG_MINTER;
   const defaultAddress = DEFAULT_ORG_OWNER;
-  const provider = useRef(null);
 
   const [isSubmitting, setisSubmitting] = useState<boolean>(false);
 
@@ -132,45 +131,33 @@ const ProfilePage: React.FC = () => {
   };
 
   const init = () => {
-    if (provider?.provider?.selectedAddress?.toLowerCase() !== defaultAddress?.toLowerCase()) {
-      return router.replace('/');
-    }
+    setTimeout(() => {
+      let provider = new ethers.providers.Web3Provider(window.ethereum);
 
-    window.ethereum.on('accountsChanged', function () {
+      window.ethereum.on('accountsChanged', function () {
+        if (provider?.provider?.selectedAddress?.toLowerCase() !== defaultAddress?.toLowerCase()) {
+          router.replace('/');
+        }
+      });
+
       if (provider?.provider?.selectedAddress?.toLowerCase() !== defaultAddress?.toLowerCase()) {
-        router.replace('/');
+        return router.replace('/');
       }
-    });
 
-    getMintNFTList();
-  };
-
-  const compaireAddress = () => {
-    if (provider?.current?.provider?.selectedAddress?.toLowerCase() !== defaultAddress?.toLowerCase()) {
-      router.replace('/');
-    }
+      getMintNFTList();
+    }, 500);
   };
 
   useEffect(() => {
-    provider.current = new ethers.providers.Web3Provider(window.ethereum);
-
-    window.ethereum.on('accountsChanged', compaireAddress);
-
-    compaireAddress();
-
-    getMintNFTList();
-
-    return () => {
-      window.ethereum.removeListener('accountsChanged', compaireAddress);
-    };
-  }, [router]);
+    init();
+  }, []);
 
   return (
     <div className='bg-black text-white min-h-screen '>
       <main className='container mx-auto p-4'>
         <section className='text-center mb-10'>
           <div className='inline-block relative'>
-            <img src='/availability1.jpg' alt='' className='' />
+            <img src='/availability.jpg' alt='' className='' />
           </div>
         </section>
 
