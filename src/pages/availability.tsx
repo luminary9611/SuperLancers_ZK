@@ -132,12 +132,12 @@ const ProfilePage: React.FC = () => {
 
   const init = () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    if (provider.provider?.selectedAddress.toLowerCase() !== defaultAddress.toLowerCase()) {
+    if (provider?.provider?.selectedAddress?.toLowerCase() !== defaultAddress?.toLowerCase()) {
       return router.replace('/');
     }
 
     window.ethereum.on('accountsChanged', function () {
-      if (provider.provider?.selectedAddress.toLowerCase() !== defaultAddress.toLowerCase()) {
+      if (provider?.provider?.selectedAddress?.toLowerCase() !== defaultAddress?.toLowerCase()) {
         router.replace('/');
       }
     });

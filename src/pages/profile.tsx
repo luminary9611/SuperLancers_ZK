@@ -24,11 +24,11 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     window.ethereum.on('accountsChanged', function () {
-      setIsShowAvailablity(provider.provider?.selectedAddress.toLowerCase() === defaultAddress.toLowerCase());
+      setIsShowAvailablity(provider?.provider?.selectedAddress?.toLowerCase() === defaultAddress.toLowerCase());
     });
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    setIsShowAvailablity(provider.provider?.selectedAddress.toLowerCase() === defaultAddress.toLowerCase());
+    setIsShowAvailablity(provider?.provider?.selectedAddress?.toLowerCase() === defaultAddress.toLowerCase());
   }, []);
 
   return (
